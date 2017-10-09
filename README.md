@@ -1,92 +1,61 @@
-# README.md
+# README
 
-If you encounter an error installing vb-guest
-
-VAGRANT_DISABLE_STRICT_DEPENDENCY_ENFORCEMENT=1 vagrant plugin install vagrant-vbguest
-
-## Setup Chef Workstation
-
-Use instructions from [Chef Instructions](https://docs.chef.io/install_dk.html#review-prerequisites)
-
-create a cookbook
+1. Generate ssh key to be used
 
 ```sh
-chef generate cookbook cookbooks/learn_chef_httpd
+ssh-keygen -t rsa -b 4096 -C "vagrant@vagrant.com" -N "" -f data/ssh/id_rsa
 ```
 
-create a template
+
+It seems like your system ports are busy, do check docker ps -a, below is the process to install docker community edition :
+
+Remove previous version of docker and docker engine
+$ sudo apt-get remove docker docker-engine
+
+Allow apt to use repo over https
+$ sudo apt-get install apt-transport-https \ ca-certificates \ curl \ software-properties-common
+
+Add Docker official's GPG Key
+$ curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+
+Setting up stable repository
+$ sudo add-apt-repository \ "deb [arch=amd64] https://download.docker.com/linux/ubuntu \ $(lsb_release -cs) \ stable"
+
+$(lsb_release -cs)
+
+Above command returns the name of Ubuntu distribution like "Xenial"
+
+Install Docker
+$ sudo apt-get update
+$ sudo apt-get install docker-ce
+
+## Install galaxy with requirements.yml
 
 ```sh
-chef generate template cookbooks/learn_chef_httpd index.html
+ansible-galaxy install -r requirements.yml
 ```
 
-Run a recipe inside a cookbook
+https://stackoverflow.com/a/44962723
 
-```sh
-sudo chef-client --local-mode --runlist 'recipe[learn_chef_httpd]'
-```
+ cat /usr/lib/systemd/system/docker.service
 
-## Uploading a cookbook
 
-1 create cookbook
+ [Unit]
+Description=Docker Application Container Engine
+Documentation=http://docs.docker.com
+After=network.target docker.socket
+Requires=docker.socket
 
-    ```sh
-    chef generate cookbook cookbooks/learn_chef_httpd
-    ```
+[Service]
+Type=notify
+EnvironmentFile=-/etc/sysconfig/docker
+ExecStart=/usr/bin/docker -d -H tcp://127.0.0.1:4243 -H fd:// $OPTIONS
+LimitNOFILE=1048576
+LimitNPROC=1048576
 
-2 check the list of cookbooks
+[Install]
+Also=docker.socket
 
-    ```sh
-    knife cookbook list
-    ```
-3 Upload the cookbook you have created
+https://stackoverflow.com/questions/26166550/set-docker-opts-in-centos
 
-    ```sh
-    knife cookbook upload learn_chef_apache2
-    ```
-
-## Allowing two vagrant instances to communicate
-
-1. generate a new ssh key in the first instance
-
-```sh
-ssh-keygen -t rsa -b 4096 -C "your_email@example.com"
-```
-
-2. copy the public key to the second instance
-
-```sh
-cat ~/.ssh/id_rsa.pub
-```
-
-3. On the second instance, create `~/.ssh/authorized_keys` if it does not exist
-4. Paste the contents of the public ssh key to this file.
-5. Save the file and change it to readonly 
-    
-    ```sh
-    chmod 600 ~/.ssh/authorized_keys
-    ```
-
-## Bootstraping with chef
-
-```sh
-knife bootstrap 192.168.33.12 --ssh-user vagrant --sudo --identity-file ~/.ssh/id_rsa --node-name node1-centos --run-list 'recipe[learn_chef_apache2]'
-```
-
-```sh
-knife bootstrap 192.168.33.12 --ssh-user vagrant --sudo --identity-file ~/.ssh/id_rsa --node-name node1-centos --run-list 'recipe[learn_chef_httpd]'
-```
-
-## To update a node or nodes after a new cookbook has been uploaded
-
-login to the node and run
-
-```sh
-sudo chef-client
-```
-
-or
-
-```sh
-knife ssh 'name:node1-centos' 'sudo chef-client' --ssh-user vagrant  --identity-file ~/.ssh/id_rsa --attribute ipaddress
-```
+https://stackoverflow.com/questions/26166550/set-docker-opts-in-centos
