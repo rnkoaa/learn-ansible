@@ -1,0 +1,47 @@
+---
+# tasks file for rnkoaa.base
+  
+- name: Install docker dependencies
+  vars:
+    docker_apps:
+      - yum-utils
+      - device-mapper-persistent-data
+      - lvm2
+  yum:
+    name: "{{ item }}"
+    state: present
+  with_items: "{{ docker_apps }}"
+
+- name: Add repository
+  command: yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+  become: true
+
+- name: Install docker
+  yum:
+    name: docker-ce
+    state: present
+  notify: start-docker
+
+- name: Set /etc/docker/daemon.json
+  copy:
+    content: "{{ daemon_json | to_nice_json }}"
+    dest: /etc/docker/daemon.json
+    owner: root
+    group: root
+    mode: 0644
+  when: daemon_json != ""
+  notify: restart-docker
+
+
+  # ATTENTION: this task can potentially create new users!
+- name: Add users to the docker group
+  user:
+    name:   "{{ item }}"
+    groups: docker
+    append: yes
+  with_items: "{{docker_group_members}}"
+  when: docker_group_members is defined
+  notify: restart-docker
+
+- name: Login to docker hub
+  command: docker login --username={{DOCKER_USER}} --password={{DOCKER_PASS}}
