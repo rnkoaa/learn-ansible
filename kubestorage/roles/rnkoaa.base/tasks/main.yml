@@ -1,0 +1,23 @@
+---
+# tasks file for rnkoaa.base
+
+# Example removing a repository and cleaning up metadata cache
+
+- name: upgrade all packages
+  yum:
+    name: 'epel-release'
+    state: latest
+  become: true
+
+- name: upgrade all packages
+  yum:
+    name: '*'
+    state: present
+  become: true
+
+- name: set timezone to Asia/Tokyo
+  timezone:
+    name: America/Chicago
+  become: true
+
+# - name: Install Docker

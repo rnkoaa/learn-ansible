@@ -1,0 +1,19 @@
+---
+- hosts: minio
+  vars:
+    docker_group_members: ["vagrant", "docker"]
+    daemon_json:
+      hosts:
+        - "tcp://0.0.0.0:2376"
+        - "tcp://0.0.0.0:2375"
+      dns:
+        - "8.8.8.8"
+        - "8.8.4.4"
+      log-level: debug
+      log-driver: json-file
+      log-opts:
+        max-file: "3"
+        max-size: "10m"
+  roles:
+    - role: rnkoaa.base
+    - role: rnkoaa.docker

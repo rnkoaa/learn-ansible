@@ -1,0 +1,4 @@
+---
+- hosts: minio
+  roles:
+    - role: rnkoaa.base
