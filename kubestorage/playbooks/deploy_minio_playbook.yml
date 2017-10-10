@@ -1,0 +1,6 @@
+---
+- hosts: minio
+  vars_files:
+    - "../secrets.yml"
+  roles:
+    - role: rnkoaa.minio

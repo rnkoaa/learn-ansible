@@ -2,4 +2,5 @@ hosts
 # data/
 .vagrant
 ssh/
-*.retry
+*.retry.vault_pass
+*/.vault_pass

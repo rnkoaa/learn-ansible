@@ -1,0 +1,17 @@
+PROJECT_NAME ?= ansible
+ORG_NAME ?= rnkoaa
+REPO_NAME ?= learn-ansible
+
+RELEASE_PROJECT := $(PROJECT_NAME)_$(BUILD_ID)
+DEV_PROJECT := $(PROJECT_NAME)_DEV_$(BUILD_ID)
+
+# Must match docker-compose service name
+APP_SERVICE_NAME := app
+
+BUILD_TAG_EXPRESSION ?= date -u +%Y%m%d%H%M%service
+
+#Execute the BUILD_TAG_EXPRESSION
+
+BUILD_EXPRESSION := $(shell $(BUILD_TAG_EXPRESSION))
+
+BUILD_TAG ?= $(BUILD_EXPRESSION)

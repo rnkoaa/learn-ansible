@@ -3,7 +3,7 @@
 
 # Example removing a repository and cleaning up metadata cache
 
-- name: upgrade all packages
+- name: Install Extra release repos
   yum:
     name: 'epel-release'
     state: latest
@@ -17,12 +17,12 @@
 
 - name: Install pip
   yum:
-    name: 'pip'
+    name: 'python-pip'
     state: present
   become: true
 
 # upgrade pip to the latest version
-- pip:
+- pip: 
     name: pip
     extra_args: --upgrade
 
@@ -30,5 +30,3 @@
   timezone:
     name: America/Chicago
   become: true
-
-# - name: Install Docker

@@ -1,2 +1,45 @@
 ---
 # tasks file for rnkoaa.minio
+# Deploys Minio as a docker container to a host.
+# this is only a single container image
+- name: Login to Docker
+  docker_login:
+    username: "{{ docker_hub_username }}"
+    password: "{{ docker_hub_password }}"
+    email: "{{ docker_hub_email }}"
+
+- name: Pull minio docker image
+  docker_image:
+    name: minio/minio
+    state: present
+# create a directory if it doesn't exist
+- file: 
+    path: /data
+    state: directory
+    owner: root
+    group: root
+    mode: 0755
+  become: true
+
+- name: Create a minio data container
+  docker_container:
+    name: minio-data
+    image: minio/minio
+    volumes:
+      - /data
+
+- name: create docker container
+  docker_container:
+    name: minio
+    image: minio/minio
+    state: started
+    ports:
+     - "9000:9000"
+    volumes:
+      - /mnt/data:/data
+    env:
+      MINIO_ACCESS_KEY: "{{ minio_access_key }}"
+      MINIO_SECRET_KEY: "{{ minio_secret_key }}"
+    command: server /data
+
+  

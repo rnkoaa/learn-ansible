@@ -40,3 +40,23 @@ https://stackoverflow.com/a/44962723
  cat /usr/lib/systemd/system/docker.service
 
 docker -H 192.168.33.20:2376 ps 
+
+docker run -p 9000:9000 --name minio1 \
+  -v /mnt/data:/data \
+  minio/minio server /data
+
+  ansible-vault view secrets.yml --ask-vault-pass
+
+# create a vault-password-file
+  echo 'password' > .vault_pass
+
+  ansible-vault view secrets.yml
+
+  echo '*/.vault_pass' >> ../.gitignore
+
+  export ANSIBLE_VAULT_PASSWORD_FILE=./.vault_pass
+
+
+  ansible --vault-password-file=.vault_pass
+  
+   ansible-vault view --vault-password-file=.vault_pass secrets.yml
