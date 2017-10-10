@@ -1,0 +1,16 @@
+---
+- hosts: all
+  remote_user: centos
+  become: yes
+  become_method: sudo
+  tasks:
+  - name: login to docker registry
+    docker_login:
+      username: "{{ docker_hub_username }}"
+      password: "{{ docker_hub_password }}"
+      email: "{{ docker_hub_email }}"
+  - name: create docker container
+    docker_container:
+      name: mycontainer
+      image: centos
+      state: started

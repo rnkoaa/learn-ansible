@@ -15,6 +15,17 @@
     state: present
   become: true
 
+- name: Install pip
+  yum:
+    name: 'pip'
+    state: present
+  become: true
+
+# upgrade pip to the latest version
+- pip:
+    name: pip
+    extra_args: --upgrade
+
 - name: set timezone to Asia/Tokyo
   timezone:
     name: America/Chicago

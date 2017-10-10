@@ -4,6 +4,7 @@
     docker_group_members: ["vagrant", "docker"]
     daemon_json:
       hosts:
+        - "unix:///var/run/docker.sock"
         - "tcp://0.0.0.0:2376"
         - "tcp://0.0.0.0:2375"
       dns:

@@ -55,6 +55,10 @@
   notify: restart-docker
   become: true
 
+- pip:
+    name: docker-py
+  become: true
+
 - name: Login to docker hub
   command: docker login --username={{DOCKER_USER}} --password={{DOCKER_PASS}}
   become: true
