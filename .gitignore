@@ -2,3 +2,4 @@ hosts
 # data/
 .vagrant
 ssh/
+*.retry

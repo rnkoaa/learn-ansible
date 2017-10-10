@@ -8,7 +8,7 @@ Vagrant.configure("2") do |config|
       workstation.vm.box = "centos/7"
       workstation.vm.hostname = "workstation"
       workstation.vm.network "private_network", ip: "192.168.33.10"
-      workstation.vm.synced_folder "./data/workstation", "/vagrant_data"
+      workstation.vm.synced_folder "./data", "/vagrant_data"
       workstation.vm.provider :virtualbox do |vb|
         vb.customize ["modifyvm", :id, "--memory", "1024"]
         # vb.customize ["modifyvm", :id, "--cpus", "2"]
@@ -22,17 +22,14 @@ Vagrant.configure("2") do |config|
         # echo "export CHEF_REPO=/home/vagrant/chef-repo" >> /home/vagrant/.profile
         echo "export EDITOR=vim" >> /home/vagrant/.profile
   
-        echo "\"192.168.33.20 node1\" >> /etc/hosts"
+        echo '192.168.33.20 node1' >> /etc/hosts
         # Reload the bash_profile file so the environment variables
         # Are available to the current
         source /home/vagrant/.profile
   
-        sudo yum update -y 
-          && sudo yum -y install vim wget git zip unzip tree python-pip \
-          && yum install -y epel-release \
-          && sudo yum install -y ansible \
-          && sudo pip install --upgrade pip \
-          && sudo pip install docker-compose
+        sudo yum update -y && sudo yum -y install vim wget git zip unzip tree python-pip
+        sudo yum install -y epel-release ansible
+        sudo pip install --upgrade pip && sudo pip install docker-compose
         
         git config --global user.email "vagrant@vagrant.com"
         git config --global user.name "Vagrant"

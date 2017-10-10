@@ -39,23 +39,4 @@ https://stackoverflow.com/a/44962723
 
  cat /usr/lib/systemd/system/docker.service
 
-
- [Unit]
-Description=Docker Application Container Engine
-Documentation=http://docs.docker.com
-After=network.target docker.socket
-Requires=docker.socket
-
-[Service]
-Type=notify
-EnvironmentFile=-/etc/sysconfig/docker
-ExecStart=/usr/bin/docker -d -H tcp://127.0.0.1:4243 -H fd:// $OPTIONS
-LimitNOFILE=1048576
-LimitNPROC=1048576
-
-[Install]
-Also=docker.socket
-
-https://stackoverflow.com/questions/26166550/set-docker-opts-in-centos
-
-https://stackoverflow.com/questions/26166550/set-docker-opts-in-centos
+docker -H 192.168.33.20:2376 ps 
