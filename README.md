@@ -5,8 +5,6 @@
 ```sh
 ssh-keygen -t rsa -b 4096 -C "vagrant@vagrant.com" -N "" -f data/ssh/id_rsa
 ```
-
-
 It seems like your system ports are busy, do check docker ps -a, below is the process to install docker community edition :
 
 Remove previous version of docker and docker engine
@@ -58,5 +56,5 @@ docker run -p 9000:9000 --name minio1 \
 
 
   ansible --vault-password-file=.vault_pass
-  
+
    ansible-vault view --vault-password-file=.vault_pass secrets.yml
