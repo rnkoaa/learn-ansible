@@ -71,3 +71,11 @@ docker run -p 9000:9000 --name minio1 \
     delay: 1
 
 ```
+
+## Ansible Docker components
+docker_container
+docker_image
+docker_image_facts
+docker_login
+docker_network
+docker_service
