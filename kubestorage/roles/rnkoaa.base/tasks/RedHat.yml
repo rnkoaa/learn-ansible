@@ -1,5 +1,5 @@
 ---
-# tasks file for rnkoaa.base ubuntu version
+# tasks file for rnkoaa.base
 
 # Example removing a repository and cleaning up metadata cache
 
@@ -19,14 +19,4 @@
   yum:
     name: 'python-pip'
     state: present
-  become: true
-
-# upgrade pip to the latest version
-- pip: 
-    name: pip
-    extra_args: --upgrade
-
-- name: set timezone to Asia/Tokyo
-  timezone:
-    name: America/Chicago
   become: true

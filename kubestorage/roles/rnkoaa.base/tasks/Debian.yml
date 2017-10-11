@@ -1,0 +1,29 @@
+---
+# tasks file for rnkoaa.base ubuntu version
+
+- name: Update all packages to the latest version
+  apt:
+    upgrade: dist
+
+- name: Run the equivalent of "apt-get update" as a separate step
+  apt:
+    update_cache: yes
+
+- name: Remove useless packages from the cache
+  apt:
+    autoclean: yes
+
+- name: Remove dependencies that are no longer required
+  apt:
+    autoremove: yes
+
+- name: Install pip
+  apt:
+    name: 'python-pip'
+    state: present
+  become: true
+
+# upgrade pip to the latest version
+- pip: 
+    name: pip
+    extra_args: --upgrade

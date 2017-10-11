@@ -1,4 +1,4 @@
 ---
-- hosts: minio
+- hosts: ubuntu
   roles:
     - role: rnkoaa.base
