@@ -17,13 +17,14 @@
   apt:
     autoremove: yes
 
-- name: Install pip
+# - name: Install pip
+#   apt:
+#     name: 'python-pip'
+#     state: present
+#   become: true
+
+- name: Install pip3
   apt:
-    name: 'python-pip'
+    name: 'python3-pip'
     state: present
   become: true
-
-# upgrade pip to the latest version
-- pip: 
-    name: pip
-    extra_args: --upgrade

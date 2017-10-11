@@ -1,9 +1,9 @@
 ---
 - hosts: ubuntu
-  gather_facts: False
-  pre_tasks:
-    - raw: test -e /usr/bin/python || (apt -y update && apt install -y python-minimal)
-    - setup: # aka gather_facts
+  # gather_facts: False
+  # pre_tasks:
+  #   - raw: test -e /usr/bin/python || (apt -y update && apt install -y python-minimal)
+  #   - setup: # aka gather_facts
   become: true
   roles:
     - role: rnkoaa.base

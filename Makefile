@@ -58,6 +58,10 @@ docker-install:
 	${INFO} "Running Docker Install playbook"
 	ansible-playbook -i $(INVENTORY) $(PLAYBOOKS)/install_docker_playbook.yml
 
+ubuntu-docker-install:
+	${INFO} "Running Docker Install playbook"
+	ansible-playbook -i $(INVENTORY) $(PLAYBOOKS)/ubuntu_docker_playbook.yml
+
 clean-playbooks:
 	${WARN} "Deleting all *.retry files from playbooks directory"
 	rm $(PLAYBOOKS)/*.retry

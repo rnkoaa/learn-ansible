@@ -70,23 +70,18 @@ Vagrant.configure("2") do |config|
       end
   
       node.vm.provision "shell", inline: <<-SHELL
-        # Disable firewall
-        # sudo systemctl stop firewalld
-        # sudo systemctl disable firewalld
-  
         echo "export VAGRANT_DATA=/vagrant_data" >> /home/vagrant/.profile
-        # echo "export CHEF_REPO=/home/vagrant/chef-repo" >> /home/vagrant/.profile
   
         # Reload the bash_profile file so the environment variables
         # Are available to the current
-        source /home/vagrant/.profile/.bash_profile
+        source /home/ubuntu/.profile/.bash_profile
   
         # Add the workstation's public key as authorized
         # Allows the workstation to ssh into this node.
-        VAGRANT_SSH_DIRECTORY="/home/vagrant/.ssh"
+        VAGRANT_SSH_DIRECTORY="/home/ubuntu/.ssh"
         if [ ! -d "$VAGRANT_SSH_DIRECTORY" ]; then
           # Control will enter here if $DIRECTORY doesn't exist.
-          mkdir /home/vagrant/.ssh
+          mkdir /home/ubuntu/.ssh
         fi
   
         ROOT_SSH_DIRECTORY="/root/.ssh"
@@ -95,18 +90,19 @@ Vagrant.configure("2") do |config|
           mkdir /root/.ssh
         fi
   
-        echo 'appending SSH Pub Key to /home/vagrant/.ssh/authorized_keys' \
-          && echo '\n#{id_rsa_key_pub }' >> /home/vagrant/.ssh/authorized_keys \
-          && chmod 600 /home/vagrant/.ssh/authorized_keys
+        echo 'appending SSH Pub Key to /home/ubuntu/.ssh/authorized_keys' \
+          && echo '\n#{id_rsa_key_pub }' >> /home/ubuntu/.ssh/authorized_keys \
+          && chmod 600 /home/ubuntu/.ssh/authorized_keys
   
-         sudo apt-get update -y && sudo apt-get -y install vim wget git zip unzip tree
+         sudo apt-get update -y && sudo apt-get upgrade -y \
+           && sudo apt-get -y install vim wget git zip unzip tree
   
-         file="/home/vagrant/.vimrc"
+         file="/home/ubuntu/.vimrc"
          if [ -f "$file" ]
          then
              echo ".vimrc exists, will not download again."
          else
-           wget -O /home/vagrant/.vimrc https://raw.githubusercontent.com/amix/vimrc/master/vimrcs/basic.vim
+           wget -O /home/ubuntu/.vimrc https://raw.githubusercontent.com/amix/vimrc/master/vimrcs/basic.vim
            # curl -O /home/vagrant/.vimrc https://raw.githubusercontent.com/amix/vimrc/master/vimrcs/basic.vim
          fi
       SHELL

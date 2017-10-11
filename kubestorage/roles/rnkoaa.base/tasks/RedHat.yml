@@ -20,3 +20,9 @@
     name: 'python-pip'
     state: present
   become: true
+
+
+# upgrade pip to the latest version
+- pip: 
+    name: pip
+    extra_args: --upgrade
