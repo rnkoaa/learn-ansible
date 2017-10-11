@@ -1,0 +1,63 @@
+---
+# Add specified repository into sources list.
+
+- name: Install prerequisite packages
+  apt:
+    name: "{{ item.package }}"
+    state: present
+  with_items: "{{ docker_prerequisite_packages }}"
+  become: true
+
+- name: Import Docker CE repository gpg key
+  apt_key:
+    url: " {{ apt_key_url }}"
+    state: present
+    id: "{{ apt_key_sig }}"
+
+- name: Add Docker CE repository
+  apt_repository:
+    repo: "{{ amd64_apt_repository }}"
+    state: present
+
+# Run apt-get update && apt-get upgrade
+- name: Update all packages to the latest version
+  apt:
+    upgrade: dist
+
+- name: Run the equivalent of "apt-get update" as a separate step
+  apt:
+    update_cache: yes
+
+- name: Install Docker CE
+  apt:
+    name: docker-ce
+    state: present
+    update_cache: yes
+
+# Override the systemd startup to prevent conflicts
+- file: 
+    path: /etc/systemd/system/docker.service.d/
+    state: directory
+    owner: root
+    group: root
+    mode: 0755
+  become: true
+
+# Example from Ansible Playbooks
+# - copy:
+#     src: files/override.conf
+#     dest: /etc/systemd/system/docker.service.d/override.conf
+#     owner: foo
+#     group: foo
+#     mode: 0644
+# Example from Ansible Playbooks
+- copy:
+    content: |
+      # Disable flags to dockerd, all settings are done in /etc/docker/daemon.json
+      [Service]
+      ExecStart=
+      ExecStart=/usr/bin/dockerd
+    dest: /etc/systemd/system/docker.service.d/override.conf
+    owner: root
+    group: root
+    mode: 0644

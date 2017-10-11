@@ -1,35 +1,28 @@
 ---
-# tasks file for rnkoaa.base
-  
-- name: Install docker dependencies
-  vars:
-    docker_apps:
-      - yum-utils
-      - device-mapper-persistent-data
-      - lvm2
-  yum:
-    name: "{{ item }}"
-    state: present
-  with_items: "{{ docker_apps }}"
-  become: true
+# tasks file for rnkoaa.base ubuntu version
+# - name: Install docker-ce (RedHat)
+#   include: install-EL.yml
+#   when: ansible_os_family == 'RedHat'
 
-- name: Add repository
-  command: yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
-  become: true
+# - name: Install docker-ce (Ubuntu)
+#   include: install-Ubuntu.yml
+#   when: ansible_distribution == 'Ubuntu'
 
-- name: Install docker
-  yum:
-    name: docker-ce
-    state: present
-  notify: start-docker
-  become: true
+# - name: Enable Docker CE service on startup
+#   service:
+#     name: docker
+#     state: started
+#     enabled: yes
+# Do os specific initialization
+- name: Import Tasks to Run
+  include_tasks: "{{ ansible_os_family}}.yml"
 
 # create a directory if it doesn't exist
 - file: 
     path: /etc/docker
     state: directory
     owner: root
-    group: docker
+    group: root
     mode: 0755
   become: true
 
@@ -38,18 +31,23 @@
     content: "{{ daemon_json | to_nice_json }}"
     dest: /etc/docker/daemon.json
     owner: root
-    group: docker
+    group: root
     mode: 0644
   when: daemon_json != ""
   notify: restart-docker
   become: true
 
-- name: enable service httpd and ensure it is not masked
+- name: enable service docker and ensure it is not masked
   systemd:
     name: docker
     enabled: yes
     masked: no
-  
+
+- name: reload service httpd, in all cases
+  systemd:
+    name: docker
+    state: reloaded
+
 - name: just force systemd to reread configs (2.4 and above)
   systemd: daemon_reload=yes
   notify: restart-docker
