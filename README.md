@@ -58,3 +58,16 @@ docker run -p 9000:9000 --name minio1 \
   ansible --vault-password-file=.vault_pass
 
    ansible-vault view --vault-password-file=.vault_pass secrets.yml
+
+```yml
+# Example runnign a smoek test
+- name: check proper response
+  uri:
+    url: http://localhost/myapp
+    return_content: yes
+    register: result
+    until: '"Hello World" in result.content'
+    retries: 10
+    delay: 1
+
+```

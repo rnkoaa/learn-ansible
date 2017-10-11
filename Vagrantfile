@@ -60,6 +60,7 @@ Vagrant.configure("2") do |config|
    
     config.vm.define "ubuntu" do |node|
       node.vm.box = "ubuntu/xenial64"
+      node.vm.box_version = "20171006.0.0"
       node.vm.hostname = "ubuntu"
       node.vm.network "private_network", ip: "192.168.33.30"
       node.vm.network :forwarded_port, guest: 22, host: 22020, id: 'ssh'

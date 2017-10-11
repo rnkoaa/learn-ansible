@@ -1,0 +1,7 @@
+---
+# tasks file for rnkoaa.motd
+- name: set the server message of the day explaining ansible was the configuration management tool
+  copy: src=motd
+        dest=/etc/motd
+        mode=644
+        

@@ -1,6 +1,9 @@
 ---
 # tasks file for rnkoaa.base ubuntu version
 
+- name: ensure aptitude is installed
+  command: apt-get -y install aptitude
+
 - name: Update all packages to the latest version
   apt:
     upgrade: dist
@@ -8,6 +11,9 @@
 - name: Run the equivalent of "apt-get update" as a separate step
   apt:
     update_cache: yes
+
+- name: upgrade system packages i.e. apt-get upgrade
+  apt: upgrade=yes
 
 - name: Remove useless packages from the cache
   apt:

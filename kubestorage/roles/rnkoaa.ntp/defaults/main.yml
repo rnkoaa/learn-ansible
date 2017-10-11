@@ -1,0 +1,4 @@
+---
+# defaults file for rnkoaa.ntp
+timezone: America/Chicago
+ntp_server: 0.debian.pool.ntp.org
