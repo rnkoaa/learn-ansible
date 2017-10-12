@@ -50,9 +50,11 @@ base:
 	${INFO} "Running base playbook"
 	ansible-playbook -i $(INVENTORY) $(PLAYBOOKS)/base_playbook.yml
 
-ubuntu-base:
+debian-base:
 	${INFO} "Running ubuntu base playbook"
 	ansible-playbook -i $(INVENTORY) $(PLAYBOOKS)/ubuntu_base_playbook.yml
+
+# ubuntu-base: debian-base
 
 docker-install:
 	${INFO} "Running Docker Install playbook"
