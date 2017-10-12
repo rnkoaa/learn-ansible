@@ -108,5 +108,51 @@ Vagrant.configure("2") do |config|
          fi
       SHELL
     end
+   
+    config.vm.define "stretch" do |node|
+      node.vm.box = "debian/stretch64"
+      node.vm.hostname = "stretch"
+      node.vm.network "private_network", ip: "192.168.33.40"
+      node.vm.network :forwarded_port, guest: 22, host: 22040, id: 'ssh'
+  
+      node.vm.provider :virtualbox do |vb|
+        vb.customize ["modifyvm", :id, "--memory", "2048"]
+        vb.customize ["modifyvm", :id, "--cpus", "2"]
+      end
+  
+      node.vm.provision "shell", inline: <<-SHELL
+        echo "export VAGRANT_DATA=/vagrant_data" >> /home/vagrant/.profile
+  
+        # Reload the bash_profile file so the environment variables
+        # Are available to the current
+        source /home/vagrant/.profile/.bash_profile
+  
+        # Add the workstation's public key as authorized
+        # Allows the workstation to ssh into this node.
+        VAGRANT_SSH_DIRECTORY="/home/ubuntu/.ssh"
+        if [ ! -d "$VAGRANT_SSH_DIRECTORY" ]; then
+          # Control will enter here if $DIRECTORY doesn't exist.
+          mkdir /home/vagrant/.ssh
+        fi
+  
+        ROOT_SSH_DIRECTORY="/root/.ssh"
+        if [ ! -d "$ROOT_SSH_DIRECTORY" ]; then
+          # Control will enter here if $ROOT_SSH_DIRECTORY doesn't exist.
+          mkdir /root/.ssh
+        fi
+  
+         sudo apt-get update -y && sudo apt-get upgrade -y \
+           && sudo apt-get -y install vim wget git zip unzip tree
+  
+         file="/home/vagrant/.vimrc"
+         if [ -f "$file" ]
+         then
+             echo ".vimrc exists, will not download again."
+         else
+           wget -O /home/vagrant/.vimrc https://raw.githubusercontent.com/amix/vimrc/master/vimrcs/basic.vim
+           # curl -O /home/vagrant/.vimrc https://raw.githubusercontent.com/amix/vimrc/master/vimrcs/basic.vim
+         fi
+      SHELL
+    end
   end
   

@@ -1,4 +1,4 @@
 ---
-- hosts: ubuntu
+- hosts: stretch
   roles:
     - role: rnkoaa.base

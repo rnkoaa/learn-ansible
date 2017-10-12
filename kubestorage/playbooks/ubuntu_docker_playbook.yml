@@ -1,5 +1,5 @@
 ---
-- hosts: ubuntu
+- hosts: stretch
   become: true
   vars:
     docker_group_members: ["ubuntu", "docker"]
