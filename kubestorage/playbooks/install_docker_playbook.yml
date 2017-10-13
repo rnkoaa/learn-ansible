@@ -1,5 +1,6 @@
 ---
-- hosts: minio
+- hosts: stretch
+  become: true
   vars:
     docker_group_members: ["vagrant", "docker"]
     daemon_json:

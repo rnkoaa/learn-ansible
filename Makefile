@@ -54,11 +54,19 @@ debian-base:
 	${INFO} "Running ubuntu base playbook"
 	ansible-playbook -i $(INVENTORY) $(PLAYBOOKS)/ubuntu_base_playbook.yml
 
+
+debian-install:
+	${INFO} "Running Docker Install playbook"
+	ansible-playbook -i $(INVENTORY) $(PLAYBOOKS)/install_docker_playbook.yml
 # ubuntu-base: debian-base
 
 docker-install:
 	${INFO} "Running Docker Install playbook"
 	ansible-playbook -i $(INVENTORY) $(PLAYBOOKS)/install_docker_playbook.yml
+
+configure-stretch:
+	${INFO} "Running Docker Install playbook"
+	ansible-playbook -i $(INVENTORY) $(PLAYBOOKS)/stretch_playbook.yml
 
 ubuntu-docker-install:
 	${INFO} "Running Docker Install playbook"

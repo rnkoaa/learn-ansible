@@ -22,15 +22,3 @@
 - name: Remove dependencies that are no longer required
   apt:
     autoremove: yes
-
-# - name: Install pip
-#   apt:
-#     name: 'python-pip'
-#     state: present
-#   become: true
-
-- name: Install pip3
-  apt:
-    name: 'python3-pip'
-    state: present
-  become: true

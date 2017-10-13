@@ -1,0 +1,9 @@
+---
+- hosts: stretch
+  become: true
+  vars_files:
+    - "../secrets.yml"
+  roles:
+    - role: rnkoaa.base
+    - role: rnkoaa.docker
+    - role: rnkoaa.minio
