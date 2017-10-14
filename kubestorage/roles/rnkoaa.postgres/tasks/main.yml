@@ -1,2 +1,35 @@
 ---
 # tasks file for rnkoaa.postgres
+- name: Login to Docker
+  docker_login:
+    username: "{{ docker_hub_username }}"
+    password: "{{ docker_hub_password }}"
+    email: "{{ docker_hub_email }}"
+
+- name: Create the postgres network
+  docker_network:
+    name: postgres_network
+    driver: bridge
+    state: present
+
+- name: Create postgres volume
+  docker_volume:
+    name: pgdata
+    state: present
+
+- name: Pull Postgres image
+  docker_image:
+    name: "postgres:9"
+    state: present
+
+- name: Create Postgres Container
+  docker_container:
+    name: postgres
+    image: "postgres:9"
+    state: started
+    ports:
+      - "5432:5432"
+    networks:
+      - name: postgres_network
+    volumes:
+      - "pgdata:/var/lib/postgresql/data"
