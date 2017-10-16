@@ -12,10 +12,10 @@
     driver: bridge
     state: present
 
-- name: Create postgres volume
-  docker_volume:
-    name: pgdata
-    state: present
+# - name: Create postgres volume
+#   docker_volume:
+#     name: pgdata
+#     state: present
 
 - name: Pull Postgres image
   docker_image:
