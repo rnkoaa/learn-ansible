@@ -1,8 +1,8 @@
 {
   "datacenter": "alpha",
-  "advertise_addr": "192.168.77.11",
+  "advertise_addr": "{{ server_ip }}",
   "client_addr": "0.0.0.0",
-  "node_name": "consul_2",
+  "node_name": "{{ server_node_name }}",
   "server": true,
   "enable_debug": true,
   "retry_join": [

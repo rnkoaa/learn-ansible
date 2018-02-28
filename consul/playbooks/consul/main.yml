@@ -1,0 +1,98 @@
+---
+- hosts: all
+  become: true
+  tasks:
+    # - name: 'create directory'
+    #   command: mkdir -p /consul/config
+    #   register: results
+    # - name: 'list'
+    #   command: ls /consul
+    #   register: results
+    # - debug:
+    #     msg: "{{ results.stdout }}"
+    # Add the user 'consul' with a specific uid and a primary group of 'admin'
+    - group:
+        name: consul
+        state: present
+
+    - user:
+        name: consul
+        comment: "Consul user"
+        group: consul
+
+    - file:
+        path: /consul/config
+        state: directory
+        owner: consul
+        recurse: yes
+        group: root
+        mode: 0755
+
+- hosts: consul_bootstrap
+  vars:
+    - server_ip: "{{ ansible_eth1.ipv4.address }}"
+    - server_node_name: "{{ ansible_hostname }}"
+    - consul_size: 3
+  tasks:
+    # 'Copy consul config file to the non bootstrap server'
+    - template:
+        # src destination relative to the playbooks dir
+        src: templates/bootstrap.config.json.j2
+        dest: /consul/config/config.json
+        owner: consul
+        group: consul
+        mode: 0644
+      become: true
+
+    # - name: create consul boostrap server container container
+    #   docker_container:
+    #     name: consul
+    #     image: consul
+    #     state: started
+    #     command: agent -ui
+    #     ports:
+    #       - "8300:8300"
+    #       - "8301:8301"
+    #       - "8301:8301/udp"
+    #       - "8302:8302"
+    #       - "8302:8302/udp"
+    #       - "8400:8400"
+    #       - "8500:8500"
+    #       - "53:53/udp"
+    #     volumes:
+    #       - /consul/config:/consul/config
+
+- hosts: consul_servers
+  vars:
+    - server_ip: "{{ ansible_eth1.ipv4.address }}"
+    - bootstrap_ip: "{{hostvars[groups['consul_bootstrap'][0]]['ansible_eth1']['ipv4']['address']}}"
+    - server_node_name: "{{ ansible_hostname }}"
+  tasks:
+    # 'Copy consul config file to the non bootstrap server'
+    - template:
+        src: templates/server.config.json.j2
+        dest: /consul/config/config.json
+        owner: consul
+        group: consul
+        mode: 0644
+      become: true
+    - debug:
+        msg: "{{ ansible_hostname }} - {{ ansible_eth1.ipv4.address }} - bootstrap {{ bootstrap_ip }}"
+    #
+    # - name: create consul boostrap server container container
+    #   docker_container:
+    #     name: consul
+    #     image: consul
+    #     state: started
+    #     command: agent
+    #     ports:
+    #       - "8300:8300"
+    #       - "8301:8301"
+    #       - "8301:8301/udp"
+    #       - "8302:8302"
+    #       - "8302:8302/udp"
+    #       - "8400:8400"
+    #       - "8500:8500"
+    #       - "53:53/udp"
+    #     volumes:
+    #       - /consul/config:/consul/config

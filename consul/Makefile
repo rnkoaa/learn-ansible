@@ -78,7 +78,7 @@ remove-consul:
 
 consul:
 	${INFO} "Running Docker Install playbook"
-	ansible-playbook -i $(INVENTORY) $(PLAYBOOKS)/consul.yml
+	ansible-playbook -i $(INVENTORY) $(PLAYBOOKS)/consul/main.yml
 
 
 clean-playbooks:
