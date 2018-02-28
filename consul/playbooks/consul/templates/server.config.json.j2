@@ -5,7 +5,5 @@
   "node_name": "{{ server_node_name }}",
   "server": true,
   "enable_debug": true,
-  "retry_join": [
-    "192.168.77.10"
-  ]
+  "retry_join": {{ other_consul_servers | to_json }}
 }

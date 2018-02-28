@@ -1,0 +1,38 @@
+---
+- hosts: "{{ m_host | default('all') }}"
+  gather_facts: true
+  become: true
+  vars:
+    external_ips: []
+
+  pre_tasks:
+    - name: Build a list of all the security group names.
+      set_fact:
+        external_ips: "{{ external_ips }} + [ '{{ hostvars[item].ext_ip }}' ]"
+      with_items: "{{ groups['all'] }}"
+
+    - set_fact:
+        ip_addr: "{{ hostvars[inventory_hostname].ext_ip }}"
+    - set_fact:
+        other_ip_addr: "{{ external_ips | reject('search',ip_addr) | list}}"
+  # tasks:
+  #   - debug:
+  #       msg: "{{ ip_addr }}"
+  tasks:
+    # - debug:
+    #     msg: "{{ item }}"
+    #   with_items: "{{ groups['all'] }}"
+
+    - debug:
+        msg: "{{ external_ips }}"
+    - debug:
+        msg: "{{ other_ip_addr }}"
+        # msg: "{{ ip_addr }} {{ groups['all'] }}"
+      # with_items: "{{ groups['all'] }}"
+
+    # - debug:
+    #     msg: "{{ ip_addr }} {{ groups['all'] | reject('search',ip_addr) | list}}"
+    #   # with_items: "{{ groups['all'] }}"
+    # - debug:
+    #     msg: "Me => {{ ip_addr }}  >> Others => {{ other_ip_addr }}"
+      # with_items: "{{ groups['all'] }}"
