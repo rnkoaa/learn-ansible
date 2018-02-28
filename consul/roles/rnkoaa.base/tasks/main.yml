@@ -1,0 +1,42 @@
+---
+# - name: Add the OS specific variables
+#   include_vars: "{{ ansible_os_family }}.yml"
+
+- name: set timezone to America/Chicago
+  timezone:
+    name: America/Chicago
+  become: true
+
+# Do os specific initialization
+- name: Import Tasks to Run
+  include_tasks: "{{ ansible_os_family}}.yml"
+
+- name: Install pip
+  apt:
+    name: 'python-pip'
+    state: present
+  become: true
+
+- name: Install pip3
+  apt:
+    name: 'python3-pip'
+    state: present
+  become: true
+
+# upgrade pip to the latest version
+- pip: 
+    name: pip
+    extra_args: --upgrade
+
+# - name: Install the mysql packages in Redhat derivatives
+#   yum: name={{ item }} state=installed
+#   with_items:
+#     - "{{ mysql_pkgs }}"
+#   when: ansible_os_family == 'RedHat'
+
+# - name: Install the mysql packages in Debian derivatives
+#   apt: name={{ item }} state=installed update_cache=yes
+#   with_items:
+#     - "{{ mysql_pkgs }}"
+#   environment: "{{ env }}"
+#   when: ansible_os_family == 'Debian'

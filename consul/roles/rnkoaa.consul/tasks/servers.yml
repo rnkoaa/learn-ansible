@@ -1,0 +1,30 @@
+---
+# configure non bootstrap servers
+# 'Copy consul config file to the non bootstrap server'
+- copy:
+    # src destination relative to the playbooks dir
+    src:            ../files/server/config.json
+    dest:           /consul/config/config.json
+    owner:          consul
+    group:          consul
+    mode:           0644
+  become:           true
+
+- name:             create consul boostrap server container container
+  docker_container:
+    name:           consul
+    image:          consul
+    state:          started
+    command:        agent
+    ports:
+      - "8300:8300"
+      - "8301:8301"
+      - "8301:8301/udp"
+      - "8302:8302"
+      - "8302:8302/udp"
+      - "8400:8400"
+      - "8500:8500"
+      - "53:53/udp"
+    volumes:
+      - /consul/config:/consul/config
+    when:           not boostrap_server

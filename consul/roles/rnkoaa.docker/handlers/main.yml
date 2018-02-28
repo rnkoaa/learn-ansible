@@ -1,0 +1,13 @@
+---
+# handlers file for rnkoaa.base
+- name: restart-docker
+  service: name=docker state=restarted
+
+- name: start-docker
+  service: name=docker state=started
+
+- name: Reload systemd
+  command: systemctl daemon-reload  
+
+- name: Restart dockerio
+  service: name=docker.io state=restarted

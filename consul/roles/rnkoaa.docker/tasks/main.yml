@@ -1,0 +1,68 @@
+---
+# tasks file for rnkoaa.base ubuntu version
+# - name: Install docker-ce (RedHat)
+#   include: install-EL.yml
+#   when: ansible_os_family == 'RedHat'
+
+# - name: Install docker-ce (Ubuntu)
+#   include: install-Ubuntu.yml
+#   when: ansible_distribution == 'Ubuntu'
+
+# - name: Enable Docker CE service on startup
+#   service:
+#     name: docker
+#     state: started
+#     enabled: yes
+# Do os specific initialization
+- name: Import Tasks to Run
+  include_tasks: "{{ ansible_os_family}}.yml"
+
+# create a directory if it doesn't exist
+- file: 
+    path: /etc/docker
+    state: directory
+    owner: root
+    group: root
+    mode: 0755
+  become: true
+
+- name: Set /etc/docker/daemon.json
+  copy:
+    content: "{{ daemon_json | to_nice_json }}"
+    dest: /etc/docker/daemon.json
+    owner: root
+    group: root
+    mode: 0644
+  when: daemon_json != ""
+  notify: restart-docker
+  become: true
+
+- name: enable service docker and ensure it is not masked
+  systemd:
+    name: docker
+    enabled: yes
+    masked: no
+
+- name: reload service httpd, in all cases
+  systemd:
+    name: docker
+    state: reloaded
+
+- name: just force systemd to reread configs (2.4 and above)
+  systemd: daemon_reload=yes
+  notify: restart-docker
+
+  # ATTENTION: this task can potentially create new users!
+- name: Add users to the docker group
+  user:
+    name:   "{{ item }}"
+    groups: docker
+    append: yes
+  with_items: "{{docker_group_members}}"
+  when: docker_group_members is defined
+  notify: restart-docker
+  become: true
+
+- pip:
+    name: docker-py
+  become: true
