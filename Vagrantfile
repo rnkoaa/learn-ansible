@@ -2,156 +2,48 @@
 # vi: set ft=ruby :
 
 Vagrant.configure("2") do |config|
-    config.vm.box_check_update = false
+  N = 3
 
-    id_rsa_key_pub = File.readlines("./data/ssh/id_rsa.pub").first.strip
+  PUBLIC_KEY_FILE = File.read(".ssh/id_rsa.pub")
+  (1..N).each do |machine_id|
+    config.vm.provision "file", source: ".ssh/id_rsa", destination: "$HOME/.ssh/id_rsa"
+    config.vm.provision "file", source: ".ssh/id_rsa.pub", destination: "$HOME/.ssh/id_rsa.pub"
 
-    config.vm.define "centos" do |node|
-      node.vm.box = "centos/7"
-      node.vm.hostname = "centos"
-      node.vm.network "private_network", ip: "192.168.33.20"
+    config.vm.define "hashi-stack-#{machine_id}" do |machine|
+      machine.vm.box = "debian/stretch64"
+      machine.vm.hostname = "hashi-stack-#{machine_id}"
+      machine.vm.network "private_network", ip: "192.168.33.#{10+machine_id-1}"
+      machine.vm.provision "file", source: ".ssh/id_rsa.pub", destination: "/home/vagrant/.ssh/id_rsa.pub"
 
-      node.vm.provider :virtualbox do |vb|
-        vb.customize ["modifyvm", :id, "--memory", "2048"]
-        vb.customize ["modifyvm", :id, "--cpus", "2"]
-      end
+      machine.vm.provision "shell", inline: <<-SHELL
+        echo "==> Shell Provisioning"
 
-      node.vm.provision "shell", inline: <<-SHELL
-        # Disable firewall
-        sudo systemctl stop firewalld
-        sudo systemctl disable firewalld
-
-        echo "export VAGRANT_DATA=/vagrant_data" >> /home/vagrant/.profile
-        # echo "export CHEF_REPO=/home/vagrant/chef-repo" >> /home/vagrant/.profile
-
-        # Reload the bash_profile file so the environment variables
-        # Are available to the current
-        source /home/vagrant/.profile/.bash_profile
-
-        # Add the workstation's public key as authorized
-        # Allows the workstation to ssh into this node.
         VAGRANT_SSH_DIRECTORY="/home/vagrant/.ssh"
         if [ ! -d "$VAGRANT_SSH_DIRECTORY" ]; then
-          # Control will enter here if $DIRECTORY doesn't exist.
           mkdir /home/vagrant/.ssh
         fi
 
-        ROOT_SSH_DIRECTORY="/root/.ssh"
-        if [ ! -d "$ROOT_SSH_DIRECTORY" ]; then
-          # Control will enter here if $ROOT_SSH_DIRECTORY doesn't exist.
-          mkdir /root/.ssh
+        echo '#{PUBLIC_KEY_FILE}' >> /home/vagrant/.ssh/authorized_keys
+        chmod -R 600 /home/vagrant/.ssh/authorized_keys
+        echo 'Host 192.168.*.*' >> /home/vagrant/.ssh/config
+        echo 'StrictHostKeyChecking no' >> /home/vagrant/.ssh/config
+        echo 'UserKnownHostsFile /dev/null' >> /home/vagrant/.ssh/config
+        chmod -R 600 /home/vagrant/.ssh/config
+
+        sudo apt-get update -y && sudo apt-get upgrade -y \
+          && sudo apt-get -y install vim wget git zip unzip tree
+
+        file="/home/vagrant/.vimrc"
+        if [ -f "$file" ]
+        then
+            echo ".vimrc exists, will not download again."
+        else
+          wget -O /home/vagrant/.vimrc https://raw.githubusercontent.com/amix/vimrc/master/vimrcs/basic.vim
+          # curl -O /home/vagrant/.vimrc https://raw.githubusercontent.com/amix/vimrc/master/vimrcs/basic.vim
         fi
 
-        echo 'appending SSH Pub Key to /home/vagrant/.ssh/authorized_keys' \
-          && echo '\n#{id_rsa_key_pub }' >> /home/vagrant/.ssh/authorized_keys \
-          && chmod 600 /home/vagrant/.ssh/authorized_keys
-
-         sudo yum update -y && sudo yum -y install vim wget git zip unzip tree
-
-         file="/home/vagrant/.vimrc"
-         if [ -f "$file" ]
-         then
-             echo ".vimrc exists, will not download again."
-         else
-           wget -O /home/vagrant/.vimrc https://raw.githubusercontent.com/amix/vimrc/master/vimrcs/basic.vim
-         fi
       SHELL
-    end
 
-    config.vm.define "ubuntu" do |node|
-      node.vm.box = "ubuntu/xenial64"
-      node.vm.box_version = "20171006.0.0"
-      node.vm.hostname = "ubuntu"
-      node.vm.network "private_network", ip: "192.168.33.30"
-      node.vm.network :forwarded_port, guest: 22, host: 22020, id: 'ssh'
-
-      node.vm.provider :virtualbox do |vb|
-        vb.customize ["modifyvm", :id, "--memory", "2048"]
-        vb.customize ["modifyvm", :id, "--cpus", "2"]
-      end
-
-      node.vm.provision "shell", inline: <<-SHELL
-        echo "export VAGRANT_DATA=/vagrant_data" >> /home/vagrant/.profile
-
-        # Reload the bash_profile file so the environment variables
-        # Are available to the current
-        source /home/ubuntu/.profile/.bash_profile
-
-        # Add the workstation's public key as authorized
-        # Allows the workstation to ssh into this node.
-        VAGRANT_SSH_DIRECTORY="/home/ubuntu/.ssh"
-        if [ ! -d "$VAGRANT_SSH_DIRECTORY" ]; then
-          # Control will enter here if $DIRECTORY doesn't exist.
-          mkdir /home/ubuntu/.ssh
-        fi
-
-        ROOT_SSH_DIRECTORY="/root/.ssh"
-        if [ ! -d "$ROOT_SSH_DIRECTORY" ]; then
-          # Control will enter here if $ROOT_SSH_DIRECTORY doesn't exist.
-          mkdir /root/.ssh
-        fi
-
-        echo 'appending SSH Pub Key to /home/ubuntu/.ssh/authorized_keys' \
-          && echo '\n#{id_rsa_key_pub }' >> /home/ubuntu/.ssh/authorized_keys \
-          && chmod 600 /home/ubuntu/.ssh/authorized_keys
-
-         sudo apt-get update -y && sudo apt-get upgrade -y \
-           && sudo apt-get -y install vim wget git zip unzip tree
-
-         file="/home/ubuntu/.vimrc"
-         if [ -f "$file" ]
-         then
-             echo ".vimrc exists, will not download again."
-         else
-           wget -O /home/ubuntu/.vimrc https://raw.githubusercontent.com/amix/vimrc/master/vimrcs/basic.vim
-           # curl -O /home/vagrant/.vimrc https://raw.githubusercontent.com/amix/vimrc/master/vimrcs/basic.vim
-         fi
-      SHELL
-    end
-
-    config.vm.define "stretch" do |node|
-      node.vm.box = "debian/stretch64"
-      node.vm.hostname = "stretch"
-      node.vm.network "private_network", ip: "192.168.33.40"
-      node.vm.network :forwarded_port, guest: 22, host: 22040, id: 'ssh'
-
-      node.vm.provider :virtualbox do |vb|
-        vb.customize ["modifyvm", :id, "--memory", "1024"]
-        vb.customize ["modifyvm", :id, "--cpus", "1"]
-      end
-
-      node.vm.provision "shell", inline: <<-SHELL
-        echo "export VAGRANT_DATA=/vagrant_data" >> /home/vagrant/.profile
-
-        # Reload the bash_profile file so the environment variables
-        # Are available to the current
-        source /home/vagrant/.profile/.bash_profile
-
-        # Add the workstation's public key as authorized
-        # Allows the workstation to ssh into this node.
-        VAGRANT_SSH_DIRECTORY="/home/ubuntu/.ssh"
-        if [ ! -d "$VAGRANT_SSH_DIRECTORY" ]; then
-          # Control will enter here if $DIRECTORY doesn't exist.
-          mkdir /home/vagrant/.ssh
-        fi
-
-        ROOT_SSH_DIRECTORY="/root/.ssh"
-        if [ ! -d "$ROOT_SSH_DIRECTORY" ]; then
-          # Control will enter here if $ROOT_SSH_DIRECTORY doesn't exist.
-          mkdir /root/.ssh
-        fi
-
-         sudo apt-get update -y && sudo apt-get upgrade -y \
-           && sudo apt-get -y install vim wget git zip unzip tree
-
-         file="/home/vagrant/.vimrc"
-         if [ -f "$file" ]
-         then
-             echo ".vimrc exists, will not download again."
-         else
-           wget -O /home/vagrant/.vimrc https://raw.githubusercontent.com/amix/vimrc/master/vimrcs/basic.vim
-           # curl -O /home/vagrant/.vimrc https://raw.githubusercontent.com/amix/vimrc/master/vimrcs/basic.vim
-         fi
-      SHELL
     end
   end
+end

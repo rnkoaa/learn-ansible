@@ -1,0 +1,38 @@
+---
+- hosts: all
+  become: true
+  vars:
+    docker_group_members: ["vagrant", "docker"]
+    daemon_json:
+      hosts:
+        - "unix:///var/run/docker.sock"
+        - "tcp://0.0.0.0:2376"
+        - "tcp://0.0.0.0:2375"
+      dns:
+        - "8.8.8.8"
+        - "8.8.4.4"
+      log-level: debug
+      log-driver: json-file
+      log-opts:
+        max-file: "3"
+        max-size: "10m"
+  # vars_files:
+  #   - "../secrets.yml"
+  roles:
+    - role: rnkoaa.base
+    - role: rnkoaa.docker
+
+  tasks:
+    # This task disables swap for Kubernetes node (see https://github.com/kubernetes/kubernetes/pull/31996)
+    - name: Remove swapfile from /etc/fstab
+      mount:
+        name: swap
+        fstype: swap
+        state: absent
+    - name: Disable swap
+      command: swapoff -a
+      when: ansible_swaptotal_mb > 0
+    - name: Create a hashi-stack network
+      docker_network:
+        name: "{{ hashi_stack_network_name }}"
+        state: present

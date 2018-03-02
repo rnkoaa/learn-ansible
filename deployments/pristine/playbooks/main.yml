@@ -1,0 +1,37 @@
+---
+- hosts: "{{ m_host | default('all') }}"
+  become: true
+  tasks:
+    - name: remove consul containers
+      docker_container:
+        name: consul
+        image: consul
+        state: absent
+
+    - file:
+        path: /consul
+        state: absent
+
+    - user:
+        name: consul
+        state: absent
+    - group:
+        name: consul
+        state: absent
+
+    - name: remove vault containers
+      docker_container:
+        name: vault
+        image: vault
+        state: absent
+
+    - file:
+        path: /vault
+        state: absent
+    - user:
+        name: vault
+        state: absent
+
+    - group:
+        name: vault
+        state: absent

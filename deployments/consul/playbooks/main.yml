@@ -28,7 +28,7 @@
         group: root
         mode: 0755
 
-- hosts: consul_bootstrap
+- hosts: consul-bootstrap
   vars:
     # "{{ hostvars[inventory_hostname].ansible_default_ipv4.address }}"
     - server_ip: "{{ ansible_eth1.ipv4.address }}"
@@ -50,6 +50,8 @@
         name: consul
         image: consul
         state: started
+        networks:
+          - name: "{{ hashi_stack_network_name }}"
         command: agent -ui
         ports:
           - "8300:8300"
@@ -63,7 +65,7 @@
         volumes:
           - /consul/config:/consul/config
 
-- hosts: consul_servers
+- hosts: consul-servers
   vars:
     - server_ip: "{{ hostvars[inventory_hostname].ext_ip }}"
     - bootstrap_ip: "{{hostvars[groups['consul_bootstrap'][0]]['ansible_eth1']['ipv4']['address']}}"
@@ -96,6 +98,8 @@
         name: consul
         image: consul
         state: started
+        networks:
+          - name: "{{ hashi_stack_network_name }}"
         command: agent
         ports:
           - "8300:8300"

@@ -37,7 +37,7 @@ https://stackoverflow.com/a/44962723
 
  cat /usr/lib/systemd/system/docker.service
 
-docker -H 192.168.33.20:2376 ps 
+docker -H 192.168.33.20:2376 ps
 
 docker run -p 9000:9000 --name minio1 \
   -v /mnt/data:/data \
@@ -45,12 +45,14 @@ docker run -p 9000:9000 --name minio1 \
 
   ansible-vault view secrets.yml --ask-vault-pass
 
+  ssh  -o StrictHostKeyChecking=no -i ./.ssh/id_rsa vagrant@127.0.0.1 -p 2222
+
 # create a vault-password-file
   echo 'password' > .vault_pass
 
   ansible-vault view secrets.yml
 
-  echo '*/.vault_pass' >> ../.gitignore
+  echo "*/.vault_pass" >> ../.gitignore
 
   export ANSIBLE_VAULT_PASSWORD_FILE=./.vault_pass
 
