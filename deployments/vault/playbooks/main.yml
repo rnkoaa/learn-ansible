@@ -34,6 +34,7 @@
         image: vault
         state: started
         command: server
+        restart: yes
         ports:
           - "8200:8200"
         capabilities:
