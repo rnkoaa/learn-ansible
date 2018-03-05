@@ -1,7 +1,27 @@
 ---
 - hosts: "{{ m_host | default('all') }}"
   gather_facts: false
+  vars:
+    - server_ip: "{{ hostvars[inventory_hostname].ext_ip }}"
+    - server_node_ip: "{{ }}"
+    - consul_node_name: consul
+    - consul_port: 8500
+    - datacenter_name: alpha
+    - node_name: "{{ ansible_hostname }}"
+    - nomad_server_ips: []
+    - other_nomad_servers: []
   become: true
+
+  pre_tasks:
+    - name: Build a list of all the nomad servers for joining cluster
+      set_fact:
+        nomad_server_ips: "{{ nomad_server_ips }} + [ '{{ hostvars[item].ext_ip }}' ]"
+      with_items: "{{ groups['all'] }}"
+
+    - name: Remove current node ip from list of joining addresses
+      set_fact:
+        other_nomad_servers: "{{ nomad_server_ips | reject('search',server_ip) | list }}"
+
   tasks:
     - group:
         name: nomad
@@ -19,9 +39,16 @@
         recurse: yes
         group: root
         mode: 0755
+    - file:
+        path: /nomad/data
+        state: directory
+        owner: nomad
+        recurse: yes
+        group: root
+        mode: 0755
 
     - template:
-        src: templates/config.json.j2
+        src: templates/nomad.config.json.j2
         dest: /nomad/config/config.json
         owner: nomad
         group: nomad
@@ -33,13 +60,16 @@
         name: nomad
         image: rnkoaa/nomad:0.7.1
         state: started
-        command: server
+        command: agent -config /nomad/config/config.json
         restart: yes
         ports:
-          - "8200:8200"
+          - "4646:4646"
+          - "4648:4648"
+          - "4649:4649"
         capabilities:
           - IPC_LOCK
         volumes:
           - /nomad/config:/nomad/config
+          - /nomad/data:/nomad/data
         networks:
           - name: "{{ hashi_stack_network_name }}"

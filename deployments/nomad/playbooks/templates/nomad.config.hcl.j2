@@ -1,0 +1,36 @@
+consul {
+  address = "{{ consul_node_name}}:{{ consul_port}}"
+}
+
+bind_addr = "{{ server_ip }}" # the default
+
+datacenter = "{{ datacenter_name }}"
+
+name = "{{ node_name }}"
+enable_debug = true
+enable_syslog = true
+leave_on_interrupt = false
+log_level = debug
+
+data_dir  = "/nomad/data"
+
+ports {
+  http = 4646
+  rpc  = 4647
+  serf = 4648
+}
+
+advertise {
+  # Defaults to the node's hostname. If the hostname resolves to a loopback
+  # address you must manually configure advertise addresses.
+  http = "{{ server_ip }}:4646"
+  serf = "{{ server_ip }}:4648"
+  rpc  = "{{ server_ip }}:4649"
+}
+
+server {
+  enabled          = true
+  bootstrap_expect = 3
+  retry_join       = {{ other_nomad_servers | to_json }}
+  data_dir = "/nomad/data"
+}
