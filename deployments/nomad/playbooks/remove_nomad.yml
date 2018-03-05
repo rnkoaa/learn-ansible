@@ -1,0 +1,10 @@
+---
+- hosts: all
+  become: true
+  tasks:
+    - name: remove nomad docker container
+      docker_container:
+        name: nomad
+        image: rnkoaa/nomad:0.7.1
+        state: absent
+        force_kill: yes

@@ -48,7 +48,7 @@
     - name: create consul boostrap server container container
       docker_container:
         name: consul
-        image: consul
+        image: rnkoaa/consul:1.0.6
         state: started
         networks:
           - name: "{{ hashi_stack_network_name }}"
@@ -96,7 +96,7 @@
     - name: create consul boostrap server container container
       docker_container:
         name: consul
-        image: consul
+        image: rnkoaa/consul:1.0.6
         state: started
         networks:
           - name: "{{ hashi_stack_network_name }}"

@@ -1,0 +1,15 @@
+{
+  "advertise": {
+    "http": "{{ server_ip }}:4646",
+    "serf": "{{ server_ip }}:4648",
+    "rpc" : "{{ server_ip }}:4649"
+  },
+  "data_dir": "/nomad/data/",
+  "datacenter": "alpha",
+  "enable_debug": true,
+  "region": "us-east-1",
+  "server": {
+    "bootstrap_expect": {{ nomad_cluster_size }},
+    "enabled": true
+  }
+}
