@@ -1,37 +1,53 @@
 ---
 - hosts: "{{ m_host | default('all') }}"
+  gather_facts: false
   become: true
   tasks:
     - name: remove consul containers
       docker_container:
         name: consul
-        image: consul
+        image: rnkoaa/consul:1.0.6
         state: absent
-
-    - file:
-        path: /consul
-        state: absent
-
-    - user:
-        name: consul
-        state: absent
-    - group:
-        name: consul
-        state: absent
+        keep_volumes: no
 
     - name: remove vault containers
       docker_container:
         name: vault
         image: vault
         state: absent
+        keep_volumes: no
+
+    - name: remove nomad containers
+      docker_container:
+        name: nomad
+        image: rnkoaa/nomad:0.7.1
+        state: absent
+        keep_volumes: no
 
     - file:
+        path: /consul
+        state: absent
+    - file:
         path: /vault
+        state: absent
+    - file:
+        path: /nomad
+        state: absent
+    - user:
+        name: consul
+        state: absent
+    - group:
+        name: consul
+        state: absent
+    - user:
+        name: nomad
+        state: absent
+    - group:
+        name: nomad
         state: absent
     - user:
         name: vault
         state: absent
-
     - group:
         name: vault
         state: absent

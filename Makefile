@@ -67,6 +67,14 @@ remove-vault:
 	${INFO} "Running playbook to remove vault"
 	@ansible-playbook -i $(INVENTORY)  $(DEPLOYMENTS)/vault/playbooks/remove_vault.yml
 
+deploy-nomad:
+	${INFO} "Running nomad deploy playbook"
+	@ansible-playbook -i $(INVENTORY)  $(DEPLOYMENTS)/nomad/playbooks/main.yml
+
+remove-nomad:
+	${INFO} "Running nomad to remove vault"
+	@ansible-playbook -i $(INVENTORY)  $(DEPLOYMENTS)/nomad/playbooks/remove_nomad.yml
+
 pristine:
 	${INFO} "Running playbook to remove vault"
 	@ansible-playbook -i $(INVENTORY)  $(DEPLOYMENTS)/pristine/playbooks/main.yml

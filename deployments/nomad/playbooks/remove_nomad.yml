@@ -1,6 +1,7 @@
 ---
 - hosts: all
   become: true
+  gather_facts: false
   tasks:
     - name: remove nomad docker container
       docker_container:
@@ -8,3 +9,21 @@
         image: rnkoaa/nomad:0.7.1
         state: absent
         force_kill: yes
+        keep_volumes: no
+
+    - name: remove nomad image
+      docker_image:
+        name: rnkoaa/nomad
+        tag: 0.7.1
+        rm: yes
+        state: absent
+
+    - file:
+        path: /nomad
+        state: absent
+    - user:
+        name: nomad
+        state: absent
+    - group:
+        name: nomad
+        state: absent

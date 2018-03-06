@@ -2,15 +2,6 @@
 - hosts: "{{ m_host | default('all') }}"
   become: true
   tasks:
-    # - name: 'create directory'
-    #   command: mkdir -p /consul/config
-    #   register: results
-    # - name: 'list'
-    #   command: ls /consul
-    #   register: results
-    # - debug:
-    #     msg: "{{ results.stdout }}"
-    # Add the user 'consul' with a specific uid and a primary group of 'admin'
     - group:
         name: consul
         state: present
