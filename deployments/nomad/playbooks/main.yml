@@ -1,0 +1,68 @@
+---
+- hosts: "{{ m_host | default('all') }}"
+# - hosts: hashi-stack-1
+  gather_facts: true
+  vars:
+    - server_ip: "{{ hostvars[inventory_hostname].ext_ip }}"
+    - consul_node_name: consul
+    - consul_port: 8500
+    - datacenter_name: alpha
+    - node_name: "{{ ansible_hostname }}"
+    - nomad_server_ips: []
+    - other_nomad_servers: []
+  become: true
+
+  pre_tasks:
+    - name: Build a list of all the nomad servers for joining cluster
+      set_fact:
+        nomad_server_ips: "{{ nomad_server_ips }} + [ '{{ hostvars[item].ext_ip }}' ]"
+      with_items: "{{ groups['all'] }}"
+
+    - name: Remove current node ip from list of joining addresses
+      set_fact:
+        other_nomad_servers: "{{ nomad_server_ips | reject('search',server_ip) | list }}"
+
+  tasks:
+    - group:
+        name: nomad
+        state: present
+
+    - user:
+        name: nomad
+        comment: "Nomad user"
+        group: nomad
+
+    - file:
+        path: /tmp/nomad/config
+        state: directory
+        owner: nomad
+        recurse: yes
+        group: root
+        mode: 0755
+
+    - template:
+        src: templates/nomad.config.hcl.j2
+        dest: /tmp/nomad/config/config.hcl
+        owner: nomad
+        group: nomad
+        mode: 0644
+      become: true
+
+    - name: create nomad container
+      become: true
+      docker_container:
+        name: nomad
+        image: rnkoaa/nomad:0.7.1
+        state: started
+        restart: yes
+        networks:
+          - name: "{{ hashi_stack_network_name }}"
+        command: agent -config /nomad/config/config.hcl
+        ports:
+          - "4646:4646"
+          - "4648:4648"
+          - "4647:4647"
+          - "4647:4647/udp"
+        volumes:
+          - "/tmp/nomad/config:/nomad/config:z"
+          # - /nomad/data:/nomad/data

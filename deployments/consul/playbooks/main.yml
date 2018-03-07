@@ -1,0 +1,105 @@
+---
+- hosts: "{{ m_host | default('all') }}"
+  become: true
+  tasks:
+    - group:
+        name: consul
+        state: present
+
+    - user:
+        name: consul
+        comment: "Consul user"
+        group: consul
+
+    - file:
+        path: /consul/config
+        state: directory
+        owner: consul
+        recurse: yes
+        group: root
+        mode: 0755
+
+- hosts: consul-bootstrap
+  vars:
+    # "{{ hostvars[inventory_hostname].ansible_default_ipv4.address }}"
+    - server_ip: "{{ ansible_eth1.ipv4.address }}"
+    - server_node_name: "{{ ansible_hostname }}"
+    - consul_size: 3
+  tasks:
+    # 'Copy consul config file to the non bootstrap server'
+    - template:
+        # src destination relative to the playbooks dir
+        src: templates/bootstrap.config.json.j2
+        dest: /consul/config/config.json
+        owner: consul
+        group: consul
+        mode: 0644
+      become: true
+
+    - name: create consul boostrap server container container
+      docker_container:
+        name: consul
+        image: rnkoaa/consul:1.0.6
+        state: started
+        networks:
+          - name: "{{ hashi_stack_network_name }}"
+        command: agent -ui
+        ports:
+          - "8300:8300"
+          - "8301:8301"
+          - "8301:8301/udp"
+          - "8302:8302"
+          - "8302:8302/udp"
+          - "8400:8400"
+          - "8500:8500"
+          - "53:53/udp"
+        volumes:
+          - /consul/config:/consul/config
+
+- hosts: consul-servers
+  vars:
+    - server_ip: "{{ hostvars[inventory_hostname].ext_ip }}"
+    - bootstrap_ip: "{{hostvars[groups['consul_bootstrap'][0]]['ansible_eth1']['ipv4']['address']}}"
+    - server_node_name: "{{ ansible_hostname }}"
+    - consul_server_ips: []
+    - other_consul_servers: []
+
+  pre_tasks:
+    - name: Build a list of all the consul servers for joining cluster
+      set_fact:
+        consul_server_ips: "{{ consul_server_ips }} + [ '{{ hostvars[item].ext_ip }}' ]"
+      with_items: "{{ groups['all'] }}"
+
+    - name: Remove current node ip from list of joining addresses
+      set_fact:
+        other_consul_servers: "{{ consul_server_ips | reject('search',server_ip) | list }}"
+
+  tasks:
+    # 'Copy consul config file to the non bootstrap server'
+    - template:
+        src: templates/server.config.json.j2
+        dest: /consul/config/config.json
+        owner: consul
+        group: consul
+        mode: 0644
+      become: true
+
+    - name: create consul boostrap server container container
+      docker_container:
+        name: consul
+        image: rnkoaa/consul:1.0.6
+        state: started
+        networks:
+          - name: "{{ hashi_stack_network_name }}"
+        command: agent
+        ports:
+          - "8300:8300"
+          - "8301:8301"
+          - "8301:8301/udp"
+          - "8302:8302"
+          - "8302:8302/udp"
+          - "8400:8400"
+          - "8500:8500"
+          - "53:53/udp"
+        volumes:
+          - /consul/config:/consul/config

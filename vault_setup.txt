@@ -1,0 +1,78 @@
+Thanks Vishal. So what is the best way to form a cluster?
+
+1. Install Vault on Nodes A, B and C
+2. Initialize Vault on Node A  (#vault init)
+3. Unseal on Node A (#vault unseal)
+4. Auth against Vault (#vault auth) and use the Root token
+5. Use the Keys from Node A on B and C to unseal it?
+
+Sorry, that port was a copy error. Sorry about that. Here is the correct one.
+
+/vault/config/vault.hcl
+
+storage "consul" {
+  address = "127.0.0.1:8500"
+  path    = "vault"
+}
+
+backend "consul" {
+  address = "consul:8500"
+  advertise_addr = "consul:8300"
+  scheme = "http"
+}
+listener "tcp" {
+  address = "0.0.0.0:8200"
+  tls_disable = 1
+}
+disable_mlock = true
+
+docker create -v /config --name config busybox; docker cp /vault/config/vault.hcl config:/config/;
+
+docker create -v /config --name config busybox; docker cp /vault/config/vault.hcl config:/config/;
+
+docker create -v /config --name config busybox; docker cp /vault/config/vault.hcl config:/config/;
+
+docker run --cap-add=IPC_LOCK -d --name=dev-vault vault
+docker run --cap-add=IPC_LOCK -e 'VAULT_LOCAL_CONFIG={"backend": {"file": {"path": "/vault/file"}}, "default_lease_ttl": "168h", "max_lease_ttl": "720h"}' vault server
+
+/vault/config
+-- Configure Environment
+alias vault='docker --host=192.168.33.10 exec -it vault vault "$@"'
+export VAULT_ADDR=http://127.0.0.1:8200
+
+-- Initialise Vault
+vault operator init -address=${VAULT_ADDR} > keys.txt
+
+cat keys.txt
+
+vault operator unseal $(grep 'Key 1:' keys.txt | awk '{print $NF}')
+vault operator unseal -address=${VAULT_ADDR} $(grep 'Key 2:' keys.txt | awk '{print $NF}')
+vault operator unseal -address=${VAULT_ADDR} $(grep 'Key 3:' keys.txt | awk '{print $NF}')
+vault status -address=${VAULT_ADDR}
+
+export VAULT_TOKEN=$(grep 'Initial Root Token:' keys.txt | awk '{print substr($NF, 1, length($NF)-1)}')
+
+vault auth -address=${VAULT_ADDR} ${VAULT_TOKEN}
+
+
+docker run -d --name vault-dev --link consul:consul -p 8200:8200 --volumes-from config cgswong/vault:0.5.3 server -config=/config/vault.hcl
+docker run --cap-add=IPC_LOCK -e 'VAULT_LOCAL_CONFIG={"backend": {"file": {"path": "/vault/file"}}, "default_lease_ttl": "168h", "max_lease_ttl": "720h"}' vault server
+
+Unseal Key 1: BDtpcwZskXk+ArF1mkNCRVi0fjjHMOJqY6sufVGsAqJf
+Unseal Key 2: Xe7OTFYrEI0pL3icI16+DeU11uQ5aEs1xePNis0uexPv
+Unseal Key 3: ROwQFofz96mTxB4orlA/M8VCjmkXPyF4usFCEyYwj1Dr
+Unseal Key 4: Aewzcz+1iFCCi3xNclBhoXrRVJp4I2/p+bMiVEnnLl70
+Unseal Key 5: cKYPlMUslupAdQEVgL2lSgaeSRbTV5gXv+R5Ws3BNodZ
+
+Initial Root Token: 1044e3c2-cb96-edd2-8d56-391f6dd121be
+
+Vault initialized with 5 key shares and a key threshold of 3. Please securely
+distribute the key shares printed above. When the Vault is re-sealed,
+restarted, or stopped, you must supply at least 3 of these keys to unseal it
+before it can start servicing requests.
+
+Vault does not store the generated master key. Without at least 3 key to
+reconstruct the master key, Vault will remain permanently sealed!
+
+It is possible to generate new unseal keys, provided you have a quorum of
+existing unseal keys shares. See "vault rekey" for more information.

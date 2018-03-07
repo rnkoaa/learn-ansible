@@ -2,7 +2,8 @@
 NODE_PORT := $(shell vagrant port node --guest 22)
 PRIVATE_KEY := .vagrant/machines/node/virtualbox/private_key
 PLAYBOOKS := kubestorage/playbooks
-INVENTORY := kubestorage/hosts
+INVENTORY := hosts
+DEPLOYMENTS := deployments
 # either environment variables or kubestorage
 PROJECT_NAME ?= kubestorage
 ORG_NAME ?= kubestorage
@@ -30,7 +31,7 @@ remove_dangling_images:
 
 generate-ssh:
 	$(INFO) "generating ssh file"
-	ssh-keygen -t rsa -b 4096 -C "vagrant@vagrant.com" -N "" -f data/ssh/id_rsa
+	ssh-keygen -t rsa -b 4096 -C "vagrant@vagrant.com" -N "" -f .ssh/id_rsa
 
 vagrant-node:
 	vagrant up node
@@ -48,29 +49,35 @@ ansible-test:
 
 base:
 	${INFO} "Running base playbook"
-	ansible-playbook -i $(INVENTORY) $(PLAYBOOKS)/base_playbook.yml
+	ansible-playbook -i $(INVENTORY) $(DEPLOYMENTS)/basic/playbooks/main.yml
 
-debian-base:
-	${INFO} "Running ubuntu base playbook"
-	ansible-playbook -i $(INVENTORY) $(PLAYBOOKS)/ubuntu_base_playbook.yml
+deploy-consul:
+	${INFO} "Running playbook to deploy consul"
+	@ansible-playbook -i $(INVENTORY) $(DEPLOYMENTS)/consul/playbooks/main.yml
 
+remove-consul:
+	${INFO} "Running playbook to remove consul containers"
+	@ansible-playbook -i $(INVENTORY) $(DEPLOYMENTS)/consul/playbooks/remove_consul.yml
 
-debian-install:
-	${INFO} "Running Docker Install playbook"
-	ansible-playbook -i $(INVENTORY) $(PLAYBOOKS)/install_docker_playbook.yml
-# ubuntu-base: debian-base
+deploy-vault:
+	${INFO} "Running vault deploy playbook"
+	@ansible-playbook -i $(INVENTORY)  $(DEPLOYMENTS)/vault/playbooks/main.yml
 
-docker-install:
-	${INFO} "Running Docker Install playbook"
-	ansible-playbook -i $(INVENTORY) $(PLAYBOOKS)/install_docker_playbook.yml
+remove-vault:
+	${INFO} "Running playbook to remove vault"
+	@ansible-playbook -i $(INVENTORY)  $(DEPLOYMENTS)/vault/playbooks/remove_vault.yml
 
-configure-stretch:
-	${INFO} "Running Docker Install playbook"
-	ansible-playbook -i $(INVENTORY) $(PLAYBOOKS)/stretch_playbook.yml
+deploy-nomad:
+	${INFO} "Running nomad deploy playbook"
+	@ansible-playbook -i $(INVENTORY)  $(DEPLOYMENTS)/nomad/playbooks/main.yml
 
-ubuntu-docker-install:
-	${INFO} "Running Docker Install playbook"
-	ansible-playbook -i $(INVENTORY) $(PLAYBOOKS)/ubuntu_docker_playbook.yml
+remove-nomad:
+	${INFO} "Running nomad to remove vault"
+	@ansible-playbook -i $(INVENTORY)  $(DEPLOYMENTS)/nomad/playbooks/remove_nomad.yml
+
+pristine:
+	${INFO} "Running playbook to remove vault"
+	@ansible-playbook -i $(INVENTORY)  $(DEPLOYMENTS)/pristine/playbooks/main.yml
 
 clean-playbooks:
 	${WARN} "Deleting all *.retry files from playbooks directory"

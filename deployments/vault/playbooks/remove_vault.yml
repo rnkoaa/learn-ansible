@@ -1,0 +1,10 @@
+---
+- hosts: all
+  become: true
+  tasks:
+    - name: remove vault docker container
+      docker_container:
+        name: vault
+        image: vault
+        state: absent
+        force_kill: yes

@@ -1,0 +1,30 @@
+# hashi-stack-1 ansible_port=2222 ansible_host=127.0.0.1 ansible_private_key_file=.vagrant/machines/hashi-stack-1/virtualbox/private_key ansible_user=vagrant
+# hashi-stack-2 ansible_port=2200 ansible_host=127.0.0.1 ansible_private_key_file=.vagrant/machines/hashi-stack-2/virtualbox/private_key ansible_user=vagrant
+# hashi-stack-3 ansible_port=2201 ansible_host=127.0.0.1 ansible_private_key_file=.vagrant/machines/hashi-stack-3/virtualbox/private_key ansible_user=vagrant
+
+hashi-stack-1 ansible_port=2222 ansible_private_key_file=.ssh/id_rsa
+hashi-stack-2 ansible_port=2200 ansible_private_key_file=.ssh/id_rsa
+hashi-stack-3 ansible_port=2201 ansible_private_key_file=.ssh/id_rsa
+
+[all]
+hashi-stack-1 ext_ip=192.168.33.10 ext_hostname=hashi-stack-1
+hashi-stack-2 ext_ip=192.168.33.11 ext_hostname=hashi-stack-2
+hashi-stack-3 ext_ip=192.168.33.12 ext_hostname=hashi-stack-3
+
+[consul-bootstrap]
+hashi-stack-1
+
+[consul-servers]
+hashi-stack-2
+hashi-stack-3
+
+[hashi_stack]
+hashi-stack-1
+hashi-stack-2
+hashi-stack-3
+
+[all:vars]
+ansible_host=127.0.0.1
+ansible_user=vagrant
+ansible_private_key_file=.ssh/id_rsa
+hashi_stack_network_name=hashi-stack

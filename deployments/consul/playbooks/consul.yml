@@ -1,0 +1,14 @@
+---
+- hosts: all
+  become: true
+  roles:
+    - rnkoaa.consul
+
+- hosts: bootstrap_servers
+  become: true
+  roles:
+    - rnkoaa.consul
+  vars:
+    - bootstrap_node_name: consul_1
+    - bootstrap_server_ip: "192.168.77.10"
+    - bootstrap_server: true

@@ -1,9 +1,11 @@
 # hosts
 # data/
 .vagrant
+.ssh
 ssh/
 *.retry
 .vault_pass
 */.vault_pass
 *.log
 
+keys.txt

@@ -1,0 +1,10 @@
+---
+- hosts: all
+  become: true
+  tasks:
+    - name: remove docker container
+      docker_container:
+        name: consul
+        image: consul
+        state: absent
+        force_kill: yes

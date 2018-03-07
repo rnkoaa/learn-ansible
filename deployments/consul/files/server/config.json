@@ -1,0 +1,11 @@
+{
+  "datacenter": "alpha",
+  "advertise_addr": "192.168.77.11",
+  "client_addr": "0.0.0.0",
+  "node_name": "consul_2",
+  "server": true,
+  "enable_debug": true,
+  "retry_join": [
+    "192.168.77.10"
+  ]
+}
